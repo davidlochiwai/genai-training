@@ -1,0 +1,208 @@
+{
+  "name": "WSD Bill data extraction",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "formTitle": "Testing Flie Output",
+        "formDescription": "Testing File Output",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload File",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".jpg"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -420,
+        40
+      ],
+      "id": "67772e23-b061-4f7e-89a2-7ab3e2556d66",
+      "name": "On form submission",
+      "webhookId": "02326ef9-505d-44b3-9b47-0f687e9641f0",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "XImIWdEYneKVBmN6",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "returnBinary",
+        "completionTitle": "File Output",
+        "completionMessage": "Here is the file output.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        280,
+        40
+      ],
+      "id": "32d604ec-9e3a-44d9-b25c-c0376e3d34c0",
+      "name": "Form",
+      "webhookId": "7a89d9c8-5184-42f1-bf02-b4708cf8a0be"
+    },
+    {
+      "parameters": {
+        "model": "opengvlab/internvl3-14b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        220
+      ],
+      "id": "916fc06a-a749-41bc-a1b8-a2a45a7efec9",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "hEMU6qTMkg8F6zs7",
+          "name": "Yuen Yan Lo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"用戶編號\": \"12345678901\",\n    \"通知書發出日期\": \"1 Feb 2001\",\n\t\"計費第一天\": \"20 Sep 2000\",\n    \"計費最後一天\": \"20 Sep 2000\",\n    \"用水量(立方米)\": 70.0,\n    \"費用總額 ($)\": 500.00\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -20,
+        220
+      ],
+      "id": "0b5f149d-6c44-492c-852e-fec5d07f8aa8",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Extract data from the image.",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "type": "HumanMessagePromptTemplate",
+              "messageType": "imageBinary",
+              "binaryImageDataKey": "Upload_File"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -240,
+        40
+      ],
+      "id": "4f846682-01d0-4edb-8c86-90c80fbbc441",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "fileName": "Output.xlsx",
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        40
+      ],
+      "id": "f2eb92f7-acdd-473a-a248-6c47ac4b4b7f",
+      "name": "Convert to File"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Form": {
+      "main": [
+        []
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "19b54727-707c-40f6-9a8f-2585d4bb0376",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7d2d7783d065b4de8f6ae130c1f92c7801471ca1832ac573b6644841f2f89284"
+  },
+  "id": "cm6OxywWKEOD7k3A",
+  "tags": []
+}
